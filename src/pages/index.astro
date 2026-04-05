@@ -1,17 +1,49 @@
 ---
-
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailSignup from '../components/EmailSignup.astro';
 ---
+<BaseLayout title="Home">
+  <section class="hero section">
+    <div class="container">
+      <h1>Building AI tools for engineers.<br /><em>Writing about what comes next.</em></h1>
+      <p class="tagline">
+        Mat Coalson — senior building energy engineer turned AI tool builder.
+        SkySpark, OpenStudio, and whatever else needs building.
+      </p>
+      <div class="ctas">
+        <a href="https://github.com/mbcoalson" target="_blank" rel="noopener" class="cta-github">
+          GitHub →
+        </a>
+        <EmailSignup label="Or follow along here." buttonText="Subscribe" />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<style>
+  .hero { padding-block: var(--space-xl); }
+  h1 { margin-bottom: var(--space-m); }
+  h1 em { font-style: italic; color: var(--color-accent); }
+  .tagline {
+    font-size: 1.1rem;
+    color: var(--color-muted);
+    margin-bottom: var(--space-l);
+  }
+  .ctas {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-m);
+  }
+  .cta-github {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--color-accent);
+    border-bottom: 1px solid var(--color-accent);
+    padding-bottom: 2px;
+  }
+  .cta-github:hover { opacity: 0.7; }
+</style>
