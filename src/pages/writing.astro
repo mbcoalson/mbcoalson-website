@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const essays = (await getCollection('essays', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+---
+<BaseLayout title="Writing">
+  <section class="section">
+    <div class="container">
+      <h1>Writing</h1>
+      <p class="intro">
+        Occasional long-form pieces. No schedule — just when there's something worth saying.
+      </p>
+
+      {essays.length > 0 ? (
+        <ul class="essay-list">
+          {essays.map(essay => (
+            <li>
+              <article>
+                <time datetime={essay.data.date.toISOString()}>
+                  {essay.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                </time>
+                <h2><a href={`/essays/${essay.id.replace(/\.md$/, '')}`}>{essay.data.title}</a></h2>
+                <p>{essay.data.description}</p>
+              </article>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p data-empty class="empty">First piece coming soon.</p>
+      )}
+
+      <div class="novel-link">
+        <a href="/water-rising">Also working on a novel →</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { margin-bottom: var(--space-m); }
+  .intro {
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-l);
+  }
+  .essay-list { list-style: none; margin-bottom: var(--space-l); }
+  .essay-list li {
+    padding-block: var(--space-m);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .essay-list li:first-child { border-top: 1px solid var(--color-rule); }
+  time {
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    display: block;
+    margin-bottom: 0.4rem;
+  }
+  h2 { font-size: 1.5rem; margin-bottom: 0.4rem; }
+  h2 a { color: var(--color-text); text-decoration: none; }
+  h2 a:hover { color: var(--color-accent); }
+  article p { font-size: 0.95rem; color: var(--color-muted); }
+  .empty { color: var(--color-muted); font-style: italic; margin-bottom: var(--space-l); }
+  .novel-link { padding-top: var(--space-l); }
+  .novel-link a {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+</style>
