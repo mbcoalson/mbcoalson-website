@@ -1,0 +1,81 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RepoCard from '../components/RepoCard.astro';
+
+// TODO: Update href values to final GitHub URLs once repos are published
+const tools = [
+  {
+    name: 'OpenStudio CLI Skill',
+    description: 'TODO: Add description when publishing. OpenStudio/EnergyPlus workflow automation for building energy modeling.',
+    href: 'https://github.com/mbcoalson/skills',
+    language: 'Python',
+  },
+  {
+    name: 'work-command-center',
+    description: 'TODO: Add description after scrubbing proprietary content. Command center for engineering team workflows.',
+    href: 'https://github.com/mbcoalson/skills',
+    language: 'Shell',
+  },
+  {
+    name: 'story-storming',
+    description: 'TODO: Add description after publishing from local. AI-assisted brainstorming and narrative development.',
+    href: 'https://github.com/mbcoalson/skills',
+    language: 'Python',
+  },
+  {
+    name: 'editing-agent',
+    description: 'TODO: Add description after publishing from local. AI editing workflow for long-form writing projects.',
+    href: 'https://github.com/mbcoalson/skills',
+    language: 'Python',
+  },
+];
+---
+<BaseLayout title="Tools">
+  <section class="section">
+    <div class="container">
+      <h1>Tools</h1>
+      <p class="intro">
+        I build skills and scripts for engineers who want to use AI in their workflows.
+        Most of what I make gets used by my team before it gets published here.
+      </p>
+
+      <div class="tool-list">
+        {tools.map(tool => (
+          <RepoCard
+            name={tool.name}
+            description={tool.description}
+            href={tool.href}
+            language={tool.language}
+          />
+        ))}
+      </div>
+
+      <div class="openstudio-note">
+        <h2>OpenStudio & EnergyPlus</h2>
+        <p>
+          I'm building tooling for OpenStudio and EnergyPlus workflows — automating the
+          tedious parts of energy modeling. The IP picture is complicated, but if you're
+          working in this space and want to compare notes:
+          <a href="https://www.linkedin.com/in/mathew-coalson/" target="_blank" rel="noopener">
+            find me on LinkedIn
+          </a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  h1 { margin-bottom: var(--space-m); }
+  .intro {
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-l);
+  }
+  .tool-list { margin-bottom: var(--space-l); }
+  .openstudio-note {
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-rule);
+  }
+  .openstudio-note h2 { margin-bottom: var(--space-s); }
+</style>
