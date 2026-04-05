@@ -1,0 +1,98 @@
+---
+import { getCollection, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('citizen-scientist', ({ data }) => !data.draft);
+  return entries.map(entry => ({
+    params: { slug: entry.id.replace(/\.md$/, '') },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<BaseLayout title={`${entry.data.title} | Mat Coalson`} description={entry.data.description}>
+  <article class="section">
+    <div class="container entry-container">
+      <header>
+        <p class="eyebrow">Citizen Scientist</p>
+        <h1>{entry.data.title}</h1>
+        <p class="byline">{entry.data.authors}</p>
+        <time datetime={entry.data.date.toISOString()}>
+          {entry.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+        </time>
+      </header>
+      <div class="entry-body">
+        <Content />
+      </div>
+      {(entry.data.linkedinUrl || entry.data.sourceUrl) && (
+        <footer class="entry-footer">
+          {entry.data.linkedinUrl && (
+            <a href={entry.data.linkedinUrl} target="_blank" rel="noopener noreferrer">
+              Originally shared on LinkedIn →
+            </a>
+          )}
+          {entry.data.sourceUrl && (
+            <a href={entry.data.sourceUrl} target="_blank" rel="noopener noreferrer">
+              View on GitHub Gist →
+            </a>
+          )}
+        </footer>
+      )}
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .entry-container { max-width: 680px; }
+  header {
+    margin-bottom: var(--space-l);
+    padding-bottom: var(--space-m);
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+  }
+  h1 { margin-bottom: 0.4rem; }
+  .byline {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    font-style: italic;
+    margin-bottom: 0.5rem;
+  }
+  time {
+    font-size: 0.8rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    display: block;
+  }
+  .entry-body {
+    font-size: 1.05rem;
+    line-height: 1.8;
+  }
+  .entry-body :global(p) { margin-bottom: 1.5em; }
+  .entry-body :global(h2) { margin-top: 2em; margin-bottom: 0.75em; }
+  .entry-body :global(h3) { margin-top: 1.5em; margin-bottom: 0.5em; }
+  .entry-footer {
+    display: flex;
+    gap: var(--space-m);
+    flex-wrap: wrap;
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-rule);
+    margin-top: var(--space-l);
+  }
+  .entry-footer a {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  .entry-footer a:hover { color: var(--color-accent); }
+</style>

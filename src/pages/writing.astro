@@ -4,6 +4,9 @@ import { getCollection } from 'astro:content';
 
 const essays = (await getCollection('essays', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const citizenScientistEntries = (await getCollection('citizen-scientist', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 ---
 <BaseLayout title="Writing">
   <section class="section">
@@ -31,6 +34,35 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
         <p data-empty class="empty">First piece coming soon.</p>
       )}
 
+      <h2 class="section-heading">Citizen Scientist</h2>
+      <p class="intro">
+        Original research conducted with AI collaboration — exploring questions at the edge of what's knowable with modern tools.
+      </p>
+
+      {citizenScientistEntries.length > 0 ? (
+        <ul class="essay-list">
+          {citizenScientistEntries.map(entry => (
+            <li>
+              <article>
+                <time datetime={entry.data.date.toISOString()}>
+                  {entry.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
+                </time>
+                <h3><a href={`/citizen-scientist/${entry.id.replace(/\.md$/, '')}`}>{entry.data.title}</a></h3>
+                <p>{entry.data.description}</p>
+                <p class="byline">{entry.data.authors}</p>
+                {entry.data.linkedinUrl && (
+                  <a class="external-link" href={entry.data.linkedinUrl} target="_blank" rel="noopener noreferrer">
+                    Originally shared on LinkedIn →
+                  </a>
+                )}
+              </article>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="empty">First entry coming soon.</p>
+      )}
+
       <div class="novel-link">
         <a href="/water-rising">Also working on a novel →</a>
       </div>
@@ -44,6 +76,11 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
     color: var(--color-muted);
     font-size: 1.05rem;
     margin-bottom: var(--space-l);
+  }
+  .section-heading {
+    font-size: 1.4rem;
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-s);
   }
   .essay-list { list-style: none; margin-bottom: var(--space-l); }
   .essay-list li {
@@ -62,7 +99,24 @@ const essays = (await getCollection('essays', ({ data }) => !data.draft))
   h2 { font-size: 1.5rem; margin-bottom: 0.4rem; }
   h2 a { color: var(--color-text); text-decoration: none; }
   h2 a:hover { color: var(--color-accent); }
+  h3 { font-size: 1.3rem; margin-bottom: 0.4rem; }
+  h3 a { color: var(--color-text); text-decoration: none; }
+  h3 a:hover { color: var(--color-accent); }
   article p { font-size: 0.95rem; color: var(--color-muted); }
+  .byline {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    font-style: italic;
+    margin-top: 0.25rem;
+  }
+  .external-link {
+    display: inline-block;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+    color: var(--color-muted);
+    text-decoration: none;
+  }
+  .external-link:hover { color: var(--color-accent); }
   .empty { color: var(--color-muted); font-style: italic; margin-bottom: var(--space-l); }
   .novel-link { padding-top: var(--space-l); }
   .novel-link a {
