@@ -1,0 +1,67 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailSignup from '../components/EmailSignup.astro';
+---
+<BaseLayout
+  title="Water Rising"
+  description="A climate fiction novel set in Naples, Florida. Rising waters, survival, technology, and faith."
+>
+  <section class="section">
+    <div class="container novel-container">
+      <p class="eyebrow">A Novel</p>
+      <h1>Water Rising</h1>
+
+      <div class="premise">
+        <p>
+          Naples, Florida. The water comes faster than anyone expected — not gradually,
+          not in a way that gives people time to prepare. It comes overnight.
+        </p>
+        <!-- TODO: Expand from Obsidian vault Water_Rising/Outline.md.
+             Add 1-2 paragraphs on themes: environmental crisis, AI, community, faith.
+             No spoilers — just enough to intrigue. -->
+      </div>
+
+      <div class="characters">
+        <h2>Characters</h2>
+        <!-- TODO: Add character descriptions from Water_Rising/Characters/ in Obsidian vault.
+             Characters: Anais Non, Joseph Krutz, Jacob (last name TBD), Dr. Angeline Non.
+             Brief — 2-3 sentences each. -->
+        <p class="placeholder"><em>Character details coming soon.</em></p>
+      </div>
+
+      <div class="follow">
+        <h2>Follow Along</h2>
+        <EmailSignup
+          label="Get updates as the novel develops."
+          buttonText="Follow along"
+        />
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .novel-container { max-width: 680px; }
+  .eyebrow {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+    max-width: none;
+  }
+  h1 { margin-bottom: var(--space-l); }
+  .premise { margin-bottom: var(--space-l); }
+  .premise p { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5em; }
+  .characters {
+    margin-bottom: var(--space-l);
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-rule);
+  }
+  h2 { margin-bottom: var(--space-m); }
+  .follow {
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-rule);
+  }
+  .placeholder { color: var(--color-muted); font-style: italic; }
+</style>
