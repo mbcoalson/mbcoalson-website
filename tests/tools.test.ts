@@ -20,3 +20,18 @@ test('tools page OpenStudio section links to LinkedIn', async ({ page }) => {
   const linkedinLink = page.locator('.openstudio-note a[href*="linkedin.com"]');
   await expect(linkedinLink).toBeVisible();
 });
+
+test('tools page OpenStudio card links to correct GitHub URL', async ({ page }) => {
+  await page.goto('/tools');
+  await expect(page.locator('a[href*="running-openstudio-models"]')).toBeVisible();
+});
+
+test('tools page has Learning section', async ({ page }) => {
+  await page.goto('/tools');
+  await expect(page.locator('text=Learning').first()).toBeVisible();
+});
+
+test('tools page Learning section has HF Agents Course link', async ({ page }) => {
+  await page.goto('/tools');
+  await expect(page.locator('a[href*="huggingface.co/agents-course"]')).toBeVisible();
+});

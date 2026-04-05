@@ -6,8 +6,8 @@ import RepoCard from '../components/RepoCard.astro';
 const tools = [
   {
     name: 'OpenStudio CLI Skill',
-    description: 'TODO: Add description when publishing. OpenStudio/EnergyPlus workflow automation for building energy modeling.',
-    href: 'https://github.com/mbcoalson/skills',
+    description: 'A Claude Code skill for managing OpenStudio 3.10 model modifications and simulations — versioning, measure application via the BCL, OSW workflow execution, and result validation.',
+    href: 'https://github.com/mbcoalson/skills/tree/main/.claude/skills/running-openstudio-models',
     language: 'Python',
   },
   {
@@ -18,7 +18,7 @@ const tools = [
   },
   {
     name: 'story-storming',
-    description: 'TODO: Add description after publishing from local. AI-assisted brainstorming and narrative development.',
+    description: 'AI-assisted story and narrative brainstorming built as a Claude Code skill. Built on the Superpowers Brainstorming skill — adapted for fiction development and worldbuilding.',
     href: 'https://github.com/mbcoalson/skills',
     language: 'Python',
   },
@@ -61,6 +61,19 @@ const tools = [
           </a>.
         </p>
       </div>
+
+      <div class="learning-section">
+        <h2>Learning</h2>
+        <p class="section-intro">Courses and resources worth the time.</p>
+        <ul class="learning-list">
+          <li>
+            <a href="https://huggingface.co/agents-course" target="_blank" rel="noopener">
+              Hugging Face Agents Course
+            </a>
+            <span class="learning-desc">— Hands-on course covering AI agent fundamentals, smolagents, LangGraph, and LlamaIndex. Ends with building an agent for the GAIA benchmark.</span>
+          </li>
+        </ul>
+      </div>
     </div>
   </section>
 </BaseLayout>
@@ -78,4 +91,33 @@ const tools = [
     border-top: 1px solid var(--color-rule);
   }
   .openstudio-note h2 { margin-bottom: var(--space-s); }
+  .learning-section {
+    padding-top: var(--space-l);
+    border-top: 1px solid var(--color-rule);
+    margin-top: var(--space-l);
+  }
+  .learning-section h2 { margin-bottom: var(--space-s); }
+  .section-intro {
+    color: var(--color-muted);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-m);
+  }
+  .learning-list {
+    list-style: none;
+  }
+  .learning-list li {
+    padding-block: 0.75rem;
+    border-bottom: 1px solid var(--color-rule);
+    font-size: 0.95rem;
+  }
+  .learning-list li:first-child { border-top: 1px solid var(--color-rule); }
+  .learning-list a {
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+  }
+  .learning-list a:hover { color: var(--color-accent); }
+  .learning-desc {
+    color: var(--color-muted);
+  }
 </style>
