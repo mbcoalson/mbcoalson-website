@@ -1,0 +1,57 @@
+---
+const links = [
+  { href: '/',        label: 'Home' },
+  { href: '/tools',   label: 'Tools' },
+  { href: '/writing', label: 'Writing' },
+  { href: '/about',   label: 'About' },
+];
+const current = Astro.url.pathname;
+---
+<nav>
+  <div class="container nav-inner">
+    <a href="/" class="wordmark">Mat Coalson</a>
+    <ul>
+      {links.map(link => (
+        <li>
+          <a href={link.href} class={current === link.href ? 'active' : ''}>
+            {link.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</nav>
+
+<style>
+  nav {
+    padding-block: 1.5rem;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .nav-inner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .wordmark {
+    font-family: var(--font-display);
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--color-text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  ul {
+    list-style: none;
+    display: flex;
+    gap: 2.5rem;
+  }
+  ul a {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--color-text);
+    text-decoration: none;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  ul a:hover, ul a.active { color: var(--color-accent); }
+</style>

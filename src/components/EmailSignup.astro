@@ -1,0 +1,60 @@
+---
+interface Props {
+  label?: string;
+  buttonText?: string;
+}
+const {
+  label = 'Get updates on tools, writing, and Water Rising.',
+  buttonText = 'Subscribe',
+} = Astro.props;
+---
+<!-- Replace YOUR_USERNAME with Buttondown username after account setup -->
+<form
+  action="https://buttondown.com/api/emails/embed-subscribe/YOUR_USERNAME"
+  method="post"
+  target="popupwindow"
+  class="email-signup"
+>
+  <p class="signup-label">{label}</p>
+  <div class="signup-row">
+    <input type="email" name="email" placeholder="your@email.com" required />
+    <button type="submit">{buttonText}</button>
+  </div>
+</form>
+
+<style>
+  .email-signup { max-width: 440px; }
+  .signup-label {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin-bottom: 0.75rem;
+    max-width: none;
+  }
+  .signup-row { display: flex; gap: 0.5rem; }
+  input[type="email"] {
+    flex: 1;
+    padding: 0.6rem 0.9rem;
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    background: transparent;
+    border: 1px solid rgba(26, 26, 26, 0.3);
+    color: var(--color-text);
+  }
+  input[type="email"]:focus {
+    outline: none;
+    border-color: var(--color-accent);
+  }
+  button {
+    padding: 0.6rem 1.2rem;
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--color-accent);
+    color: var(--color-bg);
+    border: none;
+    cursor: pointer;
+  }
+  button:hover { opacity: 0.85; }
+</style>
