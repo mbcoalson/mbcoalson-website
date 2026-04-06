@@ -5,9 +5,9 @@ test('tools page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/Tools.*Mat Coalson/);
 });
 
-test('tools page has four repo cards', async ({ page }) => {
+test('tools page has three repo cards', async ({ page }) => {
   await page.goto('/tools');
-  await expect(page.locator('.repo-card')).toHaveCount(4);
+  await expect(page.locator('.repo-card')).toHaveCount(3);
 });
 
 test('tools page has OpenStudio section', async ({ page }) => {
