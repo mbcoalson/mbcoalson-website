@@ -1,0 +1,65 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Privacy Policy"
+  description="Privacy policy for the personal Home Assistant integration connecting Google Nest devices to a private, self-hosted instance."
+>
+  <section class="section">
+    <div class="container privacy-container">
+      <h1>Privacy Policy</h1>
+
+      <div class="policy">
+        <p class="lede">
+          This page covers the personal Home Assistant integration used to connect Google Nest
+          devices (thermostat, doorbell, camera) to a private, self-hosted Home Assistant
+          instance for personal home automation.
+        </p>
+
+        <p>
+          <strong>What data is accessed:</strong> Device state and status (e.g. temperature,
+          on/off, motion/doorbell events) from Nest devices authorized via the Google Smart
+          Device Management API.
+        </p>
+
+        <p>
+          <strong>How data is used:</strong> Solely to display and control these devices within
+          a private Home Assistant instance running on personal hardware, for personal
+          household use.
+        </p>
+
+        <p>
+          <strong>Data sharing:</strong> Data is not sold, shared, or transmitted to any third
+          party. It is not used for advertising, analytics, or any purpose beyond personal home
+          automation.
+        </p>
+
+        <p>
+          <strong>Data storage:</strong> Device state data is processed locally on personal
+          infrastructure. No data is stored on behalf of external users, as this integration
+          serves a single household.
+        </p>
+
+        <p>
+          <strong>Contact:</strong> Questions about this integration can be directed to
+          <a href="mailto:matt.coalson@gmail.com">matt.coalson@gmail.com</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .privacy-container { max-width: 680px; }
+  h1 { margin-bottom: var(--space-l); }
+  .policy p {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    margin-bottom: 1.5em;
+  }
+  .policy .lede {
+    padding-bottom: 1.5em;
+    border-bottom: 1px solid var(--color-rule);
+  }
+  .policy strong { font-weight: 500; }
+</style>

@@ -1,9 +1,12 @@
 <footer>
   <div class="container footer-inner">
     <p class="copyright">© {new Date().getFullYear()} Mat Coalson</p>
-    <a href="https://www.linkedin.com/in/mathew-coalson/" target="_blank" rel="noopener">
-      LinkedIn
-    </a>
+    <div class="footer-links">
+      <a href="/privacy">Privacy</a>
+      <a href="https://www.linkedin.com/in/mathew-coalson/" target="_blank" rel="noopener">
+        LinkedIn
+      </a>
+    </div>
   </div>
 </footer>
 
@@ -21,6 +24,11 @@
     font-size: 0.85rem;
     color: var(--color-muted);
     max-width: none;
+  }
+  .footer-links {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
   }
   a {
     font-size: 0.85rem;
