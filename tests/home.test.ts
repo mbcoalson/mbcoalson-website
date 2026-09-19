@@ -20,13 +20,6 @@ test('home page has GitHub link', async ({ page }) => {
   await expect(page.locator('a[href*="github.com/mbcoalson"]')).toBeVisible();
 });
 
-test('home page shows the Athena Telegram update test', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.getByTestId('athena-website-test')).toHaveText(
-    '✓ Athena website update test — sent from Telegram.',
-  );
-});
-
 test('nav has four links', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('nav ul a')).toHaveCount(4);
