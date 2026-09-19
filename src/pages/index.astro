@@ -10,6 +10,9 @@ import EmailSignup from '../components/EmailSignup.astro';
         Mat Coalson — senior building energy engineer turned AI tool builder.
         SkySpark, OpenStudio, and whatever else needs building.
       </p>
+      <p class="athena-test" data-testid="athena-website-test">
+        ✓ Athena website update test — sent from Telegram.
+      </p>
       <div class="ctas">
         <a href="https://github.com/mbcoalson" target="_blank" rel="noopener" class="cta-github">
           GitHub →
@@ -27,6 +30,12 @@ import EmailSignup from '../components/EmailSignup.astro';
   .tagline {
     font-size: 1.1rem;
     color: var(--color-muted);
+    margin-bottom: var(--space-l);
+  }
+  .athena-test {
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    margin-top: calc(-1 * var(--space-m));
     margin-bottom: var(--space-l);
   }
   .ctas {
