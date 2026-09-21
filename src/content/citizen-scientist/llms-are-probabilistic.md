@@ -1,88 +1,56 @@
 ---
 title: "LLMs Are Probabilistic. Test Them Like It."
 date: 2026-04-11
-description: "How Karpathy's autoresearch loop generalizes beyond code — and why your AI tool isn't ready after one successful run."
+description: "Testing AI-assisted OpenStudio workflows: credit the open-source foundation, then prove the model, simulation, and measurement layer all hold up."
 authors: "Mat Coalson & Claude Opus 4.6 (Anthropic)"
 sourceUrl: "https://github.com/mbcoalson/ai-engineering-toolkit/tree/master/engineering-eval-harnesses"
 draft: false
 ---
 
-In early March, Andrej Karpathy released autoresearch — a 630-line Python script that gives an AI agent one training file, one metric, and a five-minute timer. The agent modifies the code, trains, checks if the number went down, keeps or reverts, and repeats. All night.
+Building an AI tool that touches an energy model is not the same as building a reliable engineering workflow. A good result once is a demo. A good result repeatedly—on the right model, with a simulation that actually runs, measured by an instrument you have checked—is a starting point.
 
-It found 20 improvements on code Karpathy had already hand-tuned for months, including a bug in his attention implementation he'd missed entirely. Shopify's CEO ran the same pattern on their templating engine: 53% faster rendering, 61% fewer memory allocations, 93 automated commits. Overnight.
+That distinction is the heart of the testing work I have been doing with AI-assisted OpenStudio workflows.
 
-The loop is dead simple. And almost nobody is applying it outside of code.
+## Start by giving credit away
 
-I build AI tools that generate structured engineering documents from source PDFs. The outputs aren't training loss curves — they're spreadsheets, reports, technical deliverables that other engineers need to trust and use. Over the past several months I've been learning, the hard way, that the same loop Karpathy formalized for ML research is the only thing that makes these tools reliable.
+None of this starts from scratch. My tooling borrows freely from the open-source building-simulation ecosystem, and it should say so plainly. The [National Laboratory of the Rockies (NLR)](https://nlr.gov/buildings/building-energy-modeling) develops and maintains EnergyPlus and leads OpenStudio, the open-source platform around it. [Lawrence Berkeley National Laboratory (LBNL)](https://bies.lbl.gov/modeling-simulation) has helped build the broader field through EnergyPlus, Modelica Buildings, co-simulation, and optimization work.
 
-Here's what that looks like.
+That foundation changes what I am trying to build. I am not asking an LLM to invent a new physics engine. I am using it to make established tools easier to interrogate and automate: turn an engineer's request into a controlled model edit, run a real simulation, pull out the relevant results, and make the evidence easy to review.
 
-## "It Worked Once" Is Not a Test
+OpenStudio was built for this sort of extension. Its Measures can transform models and query simulation results without modifying the core platform, which makes them useful for repeatable parametric work.[^openstudio] The open-source project also tests whether objects can be loaded and produce simulation-ready models. That is a good standard to borrow: an AI-produced file is not credible because it looks plausible. It has to load, run, and produce evidence that can be checked.[^tests]
 
-Here's what happens when most people build an LLM-powered tool: they write a prompt, feed it real input, get a good output, and ship it. Maybe they run it three or four more times. The outputs look right. They move on.
+## “It worked once” is not a test
 
-This is the equivalent of running one trial and calling it a study.
+LLMs are probabilistic systems. The same request can produce a different output on another run. Sometimes that difference is cosmetic. Sometimes it means a dropped input, an invented field, or a model edit that did not actually land.
 
-LLMs are probabilistic systems. The same prompt with the same input produces a different output every time. Sometimes the differences are cosmetic — a rephrased sentence, a reordered list. Sometimes they're structural. A hallucinated field that doesn't exist in the source data. A requirement silently dropped. A value pulled from the wrong section of a document.
+I saw a version of this while testing a multi-agent workflow against a 920 ft² residential model. I ran 60 frozen-input trials across three agent touchpoints. At first, the variance report looked terrible: several headline metrics appeared to swing between 60% and 255%.
 
-You won't know which category you're in until you've run enough tests to see the distribution.
+The problem was not mostly the model or the agents. It was my measurement instrument. Six of seven headline metrics were being distorted by brittle extraction patterns. Once I corrected the scope, normalized units, and validated the extraction against known values, the apparent variation fell to 0% to 22%.
 
-## Treat Every LLM Step Like a Statistical Universe
+That was a useful correction to my own thinking. Before declaring an AI workflow unstable, you have to know that your test is measuring the thing you think it is.
 
-If your tool chains multiple LLM calls together — extract data from a document, interpret it, generate a structured output — every one of those calls is sampling from a probability distribution. You don't get to assume the distribution is tight just because the first few samples looked good.
+## What I test now
 
-How many runs do you need?
+I think of an AI-assisted model workflow as three separate systems that all need to hold up.
 
-**7** is the bare minimum. It gets you into t-test territory — enough to detect gross inconsistencies, not enough to characterize the full shape of what's possible.
+1. **The model must remain real.** A tool should write a new, versioned model—not silently overwrite the source. The output has to load in OpenStudio and run through EnergyPlus. If a human cannot open the resulting `.osm` in the OpenStudio application, the workflow has failed regardless of what the agent claims.
+2. **The simulation must remain trustworthy.** A completed run is not automatically a useful run. I check for fatal errors, empty results, unmet-hours problems, and new severe errors against a model's established baseline. The model engine and its outputs remain the system of record.
+3. **The measurement layer must earn trust too.** I compare functional parameters and simulation-relevant outputs, not just file hashes. Two Ruby files can differ while producing equivalent engineering changes; identical-looking output can conceal a broken extraction or a missed requirement.
 
-**30+** starts to approximate a normal distribution. Now you can talk about confidence intervals. Now you can say "this step produces the correct output 94% of the time" instead of "it worked when I tried it."
+The LLM is useful in this arrangement, but it does not get to be the final judge. It can interpret a request, assemble a workflow, surface discrepancies, and prepare an exception queue. Deterministic checks and real simulation outputs decide whether the work stands up.
 
-This isn't academic rigor for its own sake. It's the difference between a tool that works on your machine and a tool that works when you hand it to someone who didn't build it.
+## The harness
 
-## Generalizing the Loop
+The loop is straightforward:
 
-Karpathy's autoresearch works because it has three components:
+- **Generator:** the LLM reads the request and creates the proposed edit or structured output.
+- **Deterministic scorer:** scripts check the model, simulation, and expected parameters against a defined rubric.
+- **Analyzer:** the LLM reviews failures and proposes the next bounded change.
+- **Orchestrator:** records what was tried and either repeats the test or stops.
 
-1. **A modifiable artifact.** The training script.
-2. **An objective metric.** Validation loss.
-3. **A fixed time box.** Five minutes per experiment.
+Separating those roles matters. An agent should not grade its own homework. And every decision we can move out of the probabilistic layer—file validation, API calls, simulation runs, result extraction, and threshold checks—is one less thing that needs to be sampled thirty times.
 
-That pattern doesn't require code. It requires a measurable outcome.
+The goal is not to remove engineers from energy modeling. It is to lower the cost of careful engineering. If AI can help an engineer find the relevant requirement, make a controlled change, compare revisions, and focus attention on the exceptions, that is a useful tool. If it quietly changes a model and announces success, it is a liability with good manners.
 
-Outside of code — in engineering documents, reports, structured outputs from technical PDFs — "correct" isn't a single number. It's a rubric. Did the tool extract the right data from the right source? Is it structured in the right format? Are there hallucinated values? Are there omissions? That rubric is a checklist, not a loss function, and defining it is real engineering work.
-
-This is where most people give up. The metric is hard, so they skip the loop entirely and go back to eyeballing outputs. But the loop is the only thing that gets you from "it works sometimes" to "it works reliably." You have to do the work of defining what "correct" means before you can test for it at scale.
-
-## The Harness
-
-Here's the architecture I've landed on after months of iteration. I've open-sourced the scaffolding as a [Claude Code skill on GitHub](https://github.com/mbcoalson/ai-engineering-toolkit/tree/master/engineering-eval-harnesses).
-
-The core loop has four stages:
-
-**Generator agent** → produces the output from source material. This is the LLM doing the actual work — reading documents, extracting data, building the deliverable.
-
-**Deterministic scorer** → evaluates the output against the rubric. This is Python, not another LLM call. The scorer checks structure, completeness, data accuracy against known values. Keeping scoring deterministic is critical — if you use an LLM to evaluate LLM output, you've introduced a second probabilistic system and you're testing noise against noise.
-
-**Analyzer agent** → reviews the scores and identifies what to adjust. This is where the LLM earns its keep on the evaluation side — not scoring, but diagnosing. "The data table was extracted correctly but the summary section is missing two required fields. The source document has those fields on page 12 — the extraction step isn't reaching that page."
-
-**Orchestrator** → decides whether to loop or stop. Tracks state in JSON — what's been tested, what passed, what failed, what to try next. Repeats until the scores hit the threshold or the budget runs out.
-
-A few principles that keep it honest:
-
-**Separate generation from evaluation.** The agent that creates the output cannot be the agent that judges it. This sounds obvious. It gets violated constantly.
-
-**Make everything deterministic that you can.** Before the LLM touches your data, use OCR, regex, structured parsers — whatever gets you furthest without probabilistic inference. Every step you pull out of the LLM's hands is a step you don't have to test 30 times.
-
-**Isolate the LLM steps.** If your tool chains five LLM calls and the final output is wrong, which call failed? You need structured intermediate outputs so you can test each step independently. One monolithic prompt that does everything is untestable.
-
-**Define the rubric before you start testing.** If you can't articulate what a correct output looks like — what the failure modes are, what "close enough" means, where hallucination risk is highest — you can't automate evaluation. And if you can't automate evaluation, you can't run the loop.
-
-## Why This Matters
-
-There's an enormous gap right now between "I got an LLM to do a thing" and "I built a tool other people can rely on." Most of the industry is on the first side of that gap, demo-ing impressive one-shot outputs and wondering why adoption stalls when they hand the tool to someone else.
-
-The first working prototype is maybe 20% of the total effort. The testing harness — defining the rubric, building the scorer, running enough iterations to characterize the distribution, iterating on the prompts and extraction logic until the numbers are where they need to be — that's the other 80%.
-
-Karpathy showed us the loop. It's not new. What's new is recognizing that the same discipline applies outside of ML training — anywhere an LLM is producing outputs that humans need to trust.
-
-The tools that survive adoption won't be the ones that worked once. They'll be the ones that were tested like the probabilistic systems they are.
+[^openstudio]: [U.S. Department of Energy, “OpenStudio”](https://energy.gov/eere/buildings/articles/openstudio).
+[^tests]: [NLR OpenStudio Resources: simulation tests](https://github.com/NatLabRockies/OpenStudio-resources/blob/develop/README.md).
