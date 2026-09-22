@@ -6,8 +6,6 @@ authors: "Mat Coalson"
 draft: false
 ---
 
-*Working draft — personal essay*
-
 I recently argued with a coworker about whether we have reached AGI.
 
 We both build with AI every day: tools, skills, plugins, and MCP connectors that other people at our company use. Since January 2026, the practical shift in these models has been unmistakable. They can read across disciplines, reason over huge numbers of files, write code, revise code, and distill complicated projects down to human digestable levels. What took a team can now be done by one person and a team of agents. I have come to think that this is a meaningful form of general intelligence, even if the label remains debatable.
