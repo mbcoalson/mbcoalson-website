@@ -36,3 +36,11 @@ test('citizen scientist detail page shows LinkedIn link', async ({ page }) => {
   await page.goto('/citizen-scientist/behavioral-variance-multi-agent');
   await expect(page.locator('a[href*="linkedin.com"]').last()).toBeVisible();
 });
+
+test('Build It Better is published with its sources', async ({ page }) => {
+  await page.goto('/citizen-scientist/build-it-better');
+  await expect(page).toHaveTitle(/Build It Better.*Mat Coalson/);
+  await expect(page.locator('article h1')).toHaveText('Build It Better');
+  await expect(page.getByRole('heading', { name: 'Sources' })).toBeVisible();
+  await expect(page.locator('a[href*="energy.gov"]').first()).toBeVisible();
+});
