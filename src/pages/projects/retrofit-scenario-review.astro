@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Residential Retrofit Scenario Review"
+  description="A sanitized, read-only comparison of precomputed residential retrofit scenarios."
+>
+  <section class="intro-section">
+    <div class="container">
+      <p class="eyebrow">Model review artifact</p>
+      <h1>Residential Retrofit Scenario Review</h1>
+      <p class="lede">
+        A read-only comparison of 31 precomputed retrofit scenarios, organized around comfort,
+        preliminary cost, operational carbon, and operating cost.
+      </p>
+      <p class="boundary">
+        This is a sanitized decision-review artifact, not a reusable building model, an export,
+        an input format for an AI system, a contractor specification, or a promise of savings.
+        It excludes raw model files, utility records, physical-house inputs, and custom-scenario tools.
+      </p>
+    </div>
+  </section>
+
+  <section class="review-section" aria-label="Interactive scenario comparison">
+    <div class="container wide">
+      <iframe
+        title="Residential retrofit scenario comparison"
+        src="/assets/retrofit-scenario-review/index.html"
+        sandbox="allow-scripts allow-same-origin"
+      ></iframe>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .intro-section { padding: var(--space-xl) 0 var(--space-m); }
+  .review-section { padding: 0 0 var(--space-xl); }
+  .wide { max-width: 1320px; }
+  .eyebrow {
+    color: var(--color-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    margin-bottom: var(--space-xs);
+    text-transform: uppercase;
+  }
+  h1 { margin-bottom: var(--space-s); }
+  .lede { font-size: 1.1rem; max-width: 46rem; }
+  .boundary {
+    border-left: 2px solid var(--color-rule);
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    margin-top: var(--space-m);
+    max-width: 52rem;
+    padding-left: var(--space-s);
+  }
+  iframe {
+    background: #f5f6f8;
+    border: 1px solid var(--color-rule);
+    border-radius: 3px;
+    height: 1150px;
+    width: 100%;
+  }
+  @media (max-width: 700px) {
+    iframe { height: 1900px; }
+  }
+</style>

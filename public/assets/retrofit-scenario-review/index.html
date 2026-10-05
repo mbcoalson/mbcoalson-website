@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Residential Retrofit Scenario Review</title>
+<script src="chart.umd.js"></script>
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f5f6f8; --panel:#ffffff; --ink:#1b2026; --ink2:#5b6570; --ink3:#8a929b;
+  --line:#e4e7eb; --line2:#eef1f4;
+  --blue:#2b6cb0; --green:#2f9e6f; --amber:#d98426; --grey:#8a929b; --purple:#8e5bd0;
+  --good:#1a7a37; --bad:#b02525;
+  --dr:#2f9e6f; --bw:#2b6cb0; --to:#d98426;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 -apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
+.wrap{max-width:1240px;margin:0 auto;padding:16px 20px 64px}
+h1{font-size:22px;margin:0 0 2px}
+h2{font-size:15px;margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink2)}
+.sub{color:var(--ink2);font-size:12.5px;margin:0 0 4px}
+.banner{background:#fff8e6;border:1px solid #f0d98c;border-radius:8px;padding:8px 12px;font-size:12px;color:#6b5600;margin:10px 0}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.muted{color:var(--ink3)}
+.small{font-size:11.5px;color:var(--ink2)}
+.tiny{font-size:10.5px;color:var(--ink3)}
+
+/* control bar */
+.bar{display:flex;flex-wrap:wrap;gap:14px;align-items:center;margin:8px 0}
+.bar label{font-size:12.5px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+select,input[type=number]{font:inherit;padding:4px 7px;border:1px solid #cfd5db;border-radius:7px;background:#fff}
+input[type=range]{vertical-align:middle}
+.switch{display:inline-flex;align-items:center;gap:7px;font-weight:600;color:var(--ink)}
+.tgl{position:relative;width:38px;height:21px;background:#c7ced6;border-radius:12px;cursor:pointer;transition:.15s;flex:none}
+.tgl.on{background:var(--green)}
+.tgl::after{content:"";position:absolute;top:2px;left:2px;width:17px;height:17px;background:#fff;border-radius:50%;transition:.15s}
+.tgl.on::after{left:19px}
+.btn{font:inherit;padding:5px 11px;border:1px solid var(--blue);background:var(--blue);color:#fff;border-radius:8px;cursor:pointer;font-size:12.5px}
+.btn.sec{background:#fff;color:var(--blue)}
+.btn.mini{padding:3px 8px;font-size:11.5px}
+
+/* stage rail */
+.rail{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 2px}
+.stg{flex:1;min-width:150px;border:1px solid var(--line);border-radius:10px;padding:8px 11px;background:#fff;cursor:pointer;transition:.12s}
+.stg:hover{border-color:var(--blue);background:#f4f9ff}
+.stg.active{border-color:var(--blue);box-shadow:0 0 0 2px rgba(43,108,176,.18);background:#f4f9ff}
+.stg .n{font-weight:700;font-size:13px}
+.stg .c{float:right;font-size:11px;color:var(--ink3);background:var(--line2);border-radius:9px;padding:0 7px;line-height:18px}
+.stg .d{font-size:11px;color:var(--ink2);margin-top:2px;clear:both}
+
+/* main split */
+.split{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;align-items:start}
+@media(max-width:900px){.split{grid-template-columns:1fr}}
+.chartbox{position:relative;height:420px}
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;margin-top:8px;font-size:11.5px;color:var(--ink2)}
+.legend b{color:var(--ink)}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.line{display:inline-block;width:16px;height:0;border-top:2px dashed #9aa3ad;margin-right:5px;vertical-align:3px}
+
+/* detail card */
+.detail h3{margin:0 0 2px;font-size:15.5px}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin:8px 0}
+.chip{font-size:10.5px;background:var(--line2);color:#4a5563;padding:2px 8px;border-radius:20px;border:1px solid #e0e4e9}
+.chip b{color:var(--ink)}
+.prio{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}
+.pcell{border:1px solid var(--line);border-radius:9px;padding:8px 10px;background:#fcfdfe}
+.pcell .lab{font-size:10.5px;text-transform:uppercase;letter-spacing:.03em;color:var(--ink3);display:flex;justify-content:space-between}
+.pcell .big{font-size:18px;font-weight:700;margin-top:1px}
+.pcell .sub2{font-size:11px;color:var(--ink2)}
+.rank{font-size:9.5px;background:#eef1f4;color:#556;border-radius:4px;padding:0 5px;font-weight:700}
+.up{color:var(--bad);font-weight:700}
+.down{color:var(--good);font-weight:700}
+.flat{color:var(--ink3);font-weight:700}
+.pill{display:inline-block;padding:1px 8px;border-radius:11px;font-size:11px;font-weight:700}
+.ok{background:#e3f6e8;color:var(--good)}
+.warn{background:#fdf0dd;color:#9a6a12}
+.bad{background:#fbe4e4;color:var(--bad)}
+
+/* mini bars in detail */
+.mb{margin:5px 0}
+.mb .t{display:flex;justify-content:space-between;font-size:11px;color:var(--ink2);margin-bottom:2px}
+.track{height:12px;background:var(--line2);border-radius:6px;overflow:hidden;position:relative}
+.fill{height:100%;border-radius:6px}
+.track .base{position:absolute;top:-2px;bottom:-2px;width:2px;background:#3a424b}
+.nec .track{height:16px}
+.nec .fill{background:linear-gradient(90deg,#4a9e6f,#d98426)}
+.nec .cap{position:absolute;top:-3px;bottom:-3px;right:0;width:2px;background:var(--bad)}
+
+/* table */
+table{border-collapse:collapse;width:100%;font-size:12px}
+th,td{padding:5px 7px;text-align:right;border-bottom:1px solid var(--line2);white-space:nowrap}
+th{background:#f0f2f5;position:sticky;top:0;cursor:pointer;user-select:none;font-weight:600}
+th.l,td.l{text-align:left;white-space:normal;min-width:200px}
+th:hover{background:#e6e9ee}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:#f4f9ff}
+tr.dim{opacity:.34}
+tr.sel td{background:#eaf3ff !important;box-shadow:inset 3px 0 0 var(--blue)}
+.tblwrap{max-height:440px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+
+details{margin:10px 0}
+summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--ink2);padding:6px 0}
+.scorebars .row{display:flex;align-items:center;gap:8px;margin:3px 0;cursor:pointer;padding:2px 4px;border-radius:5px}
+.scorebars .row:hover{background:#f4f9ff}
+.scorebars .bar{height:13px;background:var(--blue);border-radius:3px}
+
+.est{background:#eaf1fb;border:1px dashed #6f9be0;color:#274b82;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;display:inline-block}
+.exact{background:#e3f6e8;border:1px solid #7ac795;color:var(--good);border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700;display:inline-block}
+textarea{width:100%;height:150px;font:12px ui-monospace,Menlo,Consolas,monospace;border:1px solid #cfd5db;border-radius:8px;padding:8px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 14px;font-size:12px;margin:6px 0}
+.kv div:nth-child(odd){color:var(--ink2)}
+.foot{margin-top:26px;font-size:11px;color:var(--ink3)}
+code{background:var(--line2);padding:1px 4px;border-radius:4px;font-size:11px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Residential Retrofit Scenario Review</h1>
+<p class="sub" id="meta"></p>
+<p class="sub">Owner priorities: <b>1 Comfort · 2 Upfront · 3 Carbon · 4 Operating</b>. Method: <b>gate on comfort, then choose on a cost ↔ carbon frontier</b>. Each dot below is one simulated run — click it to open its full card. Peel the field down by stage to see how the study was built up.</p>
+<div class="banner" id="carbonBanner"></div>
+
+<!-- ===== BUILD-UP: STAGE RAIL ===== -->
+<h2>Build-up · the 31 runs by stage</h2>
+<div class="rail" id="rail"></div>
+<p class="tiny">Every run branches from the same calibrated model, then adds one layer. Click a stage to isolate its runs in the field and table; click again (or “All”) to see the whole set.</p>
+
+<!-- ===== CONTROL BAR ===== -->
+<div class="card" style="margin-top:10px">
+  <div class="bar">
+    <span class="switch"><span class="tgl" id="gateTgl"></span> Comfort gate</span>
+    <label>Max occupied unmet hrs <input type="number" id="maxUnmet" value="0.5" min="0" max="50" step="0.25" style="width:60px"></label>
+    <button class="btn sec mini" id="showAll">Show all 31</button>
+    <span style="flex:1"></span>
+    <label>Color by
+      <select id="colorBy">
+        <option value="group">Decision group</option>
+        <option value="sys">System</option>
+        <option value="stage">Stage</option>
+      </select>
+    </label>
+    <label>Y axis
+      <select id="yMetric">
+        <option value="co2e">Annual carbon</option>
+        <option value="op_total">Operating $/yr</option>
+      </select>
+    </label>
+  </div>
+  <span class="small" id="gateCount"></span>
+  <span class="small muted"> · Comfort gate leans on occupied unmet hours (the metric that actually separates these runs). Basement swing and RH are shown as labeled context in each run card — never inferred from an estimate.</span>
+</div>
+
+<!-- ===== FIELD + DETAIL ===== -->
+<div class="split" style="margin-top:12px">
+  <div class="card">
+    <div class="chartbox"><canvas id="field"></canvas></div>
+    <div class="legend" id="fieldLegend"></div>
+    <p class="tiny" id="fieldNote"></p>
+  </div>
+  <div class="card detail" id="detail"></div>
+</div>
+
+<!-- ===== ALL RUNS TABLE ===== -->
+<details id="tblDetails">
+  <summary>All runs — full table (sortable, click a row to open its card)</summary>
+  <div class="bar"><span class="small">Grey rows fail the current comfort gate. Carbon / operating shown as delta vs the gas baseline — green beats baseline, red is worse.</span></div>
+  <div class="tblwrap"><table id="tbl"><thead></thead><tbody></tbody></table></div>
+</details>
+
+<!-- ===== WEIGHTED SCORE (SUBORDINATE) ===== -->
+<details id="scoreDetails">
+  <summary>Sensitivity lens — re-weightable score (NOT the decision)</summary>
+  <div class="card">
+    <p class="small">A blended score can silently trade comfort away, so it is not the judge. Use it only to ask “does the pick hold if I weight carbon higher than stated?” Applies to comfort-passing runs. Click a bar to open that run.</p>
+    <div class="bar">
+      <label>Comfort <input type="range" id="wComfort" min="0" max="100" value="40"><span id="wComfortV">40</span></label>
+      <label>Upfront <input type="range" id="wUpfront" min="0" max="100" value="30"><span id="wUpfrontV">30</span></label>
+      <label>Carbon <input type="range" id="wCarbon" min="0" max="100" value="20"><span id="wCarbonV">20</span></label>
+      <label>Operating <input type="range" id="wOper" min="0" max="100" value="10"><span id="wOperV">10</span></label>
+    </div>
+    <div id="scoreList" class="scorebars" style="margin-top:8px"></div>
+  </div>
+</details>
+
+<section class="card public-boundary">
+  <h2>About this public review</h2>
+  <p class="small">This page compares a fixed set of precomputed scenarios. It is not a design tool, an export, a calculation input, or a way to request a new simulation. Custom combinations require a separate, project-specific engineering review.</p>
+</section>
+
+<div class="foot" id="foot"></div>
+</div>
+
+<script>
+const DB = {"meta":{"title":"Residential retrofit scenario review","carbon_note":"Annual-average electricity emissions factor; hourly-marginal analysis not applied.","n":31},"records":[{"stage":"A","id":"A0_baseline","label":"Calibrated as-is envelope (reference)","env_attic":19,"env_air":null,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2004.03,"op_savings":0.0,"installed":12400,"incremental":0,"co2e":8018.2,"occ_unmet":0.0,"bsmt_swing":11.76,"mf_rh_out":5840,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"A","id":"A1_attic_R49","label":"Attic ceiling insulation R-19 -> R-49","env_attic":49,"env_air":null,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1945.3,"op_savings":58.73,"installed":14100,"incremental":1700,"co2e":7736.6,"occ_unmet":0.0,"bsmt_swing":11.69,"mf_rh_out":5804,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":49,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"A","id":"A2_attic_R60","label":"Attic ceiling insulation R-19 -> R-60","env_attic":60,"env_air":null,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1937.93,"op_savings":66.1,"installed":14550,"incremental":2150,"co2e":7701.2,"occ_unmet":0.0,"bsmt_swing":11.68,"mf_rh_out":5804,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":60,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"A","id":"A3_wall_R21","label":"Wall cavity insulation R-11 -> R-21","env_attic":19,"env_air":null,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1941.51,"op_savings":62.52,"installed":15500,"incremental":3100,"co2e":7709.5,"occ_unmet":0.0,"bsmt_swing":11.7,"mf_rh_out":5819,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":21,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"A","id":"A4_wall_R21_R5ci","label":"Wall R-21 cavity + R-5 continuous ext","env_attic":19,"env_air":null,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1902.52,"op_savings":101.51,"installed":36400,"incremental":24000,"co2e":7521.2,"occ_unmet":0.0,"bsmt_swing":11.65,"mf_rh_out":5791,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":21,"wall_ci_r_ip":5,"air_seal_ach50":null,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"A","id":"A5_airseal_3ACH50","label":"Air sealing to 3.0 ACH50","env_attic":19,"env_air":3.0,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1870.79,"op_savings":133.24,"installed":13900,"incremental":1500,"co2e":7219.0,"occ_unmet":0.0,"bsmt_swing":11.76,"mf_rh_out":3745,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":3.0,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"A","id":"A6_airseal_1p5ACH50","label":"Air sealing to 1.5 ACH50","env_attic":19,"env_air":1.5,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1860.45,"op_savings":143.58,"installed":16200,"incremental":3800,"co2e":7143.8,"occ_unmet":0.0,"bsmt_swing":11.76,"mf_rh_out":1890,"rh_basis":"all_hours (Stage A predates occupied mask)","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":1.5,"lbl_n":18.0},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B0_gas_baseline","label":"Gas furnace + DX, autosized (Manual-J proxy) - baseline","env_attic":19,"env_air":null,"sys":"gas_furnace_DX_baseline","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2004.01,"op_savings":0.0,"installed":12400,"incremental":0,"co2e":8018.2,"occ_unmet":0.0,"bsmt_swing":11.76,"mf_rh_out":3747,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B1_dualfuel_inverter","label":"Dual-fuel cc-ASHP (inverter) + gas backup","env_attic":19,"env_air":null,"sys":"dual_fuel_ccASHP","comp":"inverter","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2142.37,"op_savings":-138.36,"installed":20400,"incremental":8000,"co2e":8581.5,"occ_unmet":0.0,"bsmt_swing":11.76,"mf_rh_out":3682,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B2_dualfuel_singlestage","label":"Dual-fuel cc-ASHP (single-stage) + gas backup","env_attic":19,"env_air":null,"sys":"dual_fuel_ccASHP","comp":"single_stage","dhw":"gas_tank","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2219.33,"op_savings":-215.32,"installed":16400,"incremental":4000,"co2e":8971.5,"occ_unmet":0.0,"bsmt_swing":11.76,"mf_rh_out":3799,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B3_allelec_inverter","label":"All-electric cc-ASHP (inverter) + 10kW strip + HPWH 240V","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2146.14,"op_savings":-142.13,"installed":23200,"incremental":10800,"co2e":8548.0,"occ_unmet":0.0,"bsmt_swing":11.59,"mf_rh_out":3683,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B4_allelec_singlestage","label":"All-electric cc-ASHP (single-stage) + 10kW strip + HPWH 240V","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"single_stage","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2220.47,"op_savings":-216.46,"installed":19200,"incremental":6800,"co2e":8920.9,"occ_unmet":0.0,"bsmt_swing":11.59,"mf_rh_out":3802,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B5_allelec_inverter_hpwh120","label":"All-electric cc-ASHP (inverter) + 10kW strip + HPWH 120V","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_120v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2146.14,"op_savings":-142.13,"installed":22600,"incremental":10200,"co2e":8548.0,"occ_unmet":0.0,"bsmt_swing":11.59,"mf_rh_out":3683,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B6_gshp","label":"Ground-source heat pump (variable-speed) + strip + HPWH 240V","env_attic":19,"env_air":null,"sys":"gshp","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1871.22,"op_savings":132.79,"installed":34000,"incremental":21600,"co2e":7296.2,"occ_unmet":0.0,"bsmt_swing":11.59,"mf_rh_out":3861,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B7_a2w_hydroair","label":"Air-to-water (hydro-air) + strip + HPWH 240V","env_attic":19,"env_air":null,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":2148.48,"op_savings":-144.47,"installed":34200,"incremental":21800,"co2e":8426.8,"occ_unmet":0.75,"bsmt_swing":11.59,"mf_rh_out":3702,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"B","id":"B3e_allelec_inverter_att49_air15","label":"All-electric cc-ASHP (inverter) + HPWH 240V @ attic R49 + 1.5 ACH50 (envelope recheck)","env_attic":49,"env_air":1.5,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1880.37,"op_savings":123.64,"installed":28700,"incremental":16300,"co2e":7230.8,"occ_unmet":0.0,"bsmt_swing":11.52,"mf_rh_out":695,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":49,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":1.5,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"C","id":"C1_panel_ductedDX","label":"A2W panel radiators (radiant heat) + separate ducted DX cooling (inverter) + HPWH 240V","env_attic":19,"env_air":null,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1996.41,"op_savings":7.6,"installed":34200,"incremental":21800,"co2e":7786.0,"occ_unmet":0.0,"bsmt_swing":11.51,"mf_rh_out":3696,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":"panel_radiators"}}},{"stage":"C","id":"C2_fintube_ductedDX","label":"A2W fin-tube baseboard (radiant/convective heat) + separate ducted DX cooling (inverter) + HPWH 240V","env_attic":19,"env_air":null,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1995.01,"op_savings":9.0,"installed":34200,"incremental":21800,"co2e":7788.0,"occ_unmet":0.0,"bsmt_swing":11.59,"mf_rh_out":3688,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":"fintube_baseboard"}}},{"stage":"C","id":"C3_panel_ductedDX_att49_air15","label":"A2W panel radiators + ducted DX (inverter) + HPWH 240V @ attic R49 + 1.5 ACH50 (envelope package)","env_attic":49,"env_air":1.5,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":false,"op_total":1786.45,"op_savings":217.56,"installed":39700,"incremental":27300,"co2e":6739.8,"occ_unmet":0.0,"bsmt_swing":11.49,"mf_rh_out":698,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":49,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":1.5,"lbl_n":18},"equipment":{"radiant_delivery":"panel_radiators"}}},{"stage":"D","id":"D1_ducted_ext_B3","label":"Basement ducted extension (PTHP proxy, main-HP class) + B3 all-electric cc-ASHP (inverter) + 240V HPWH","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"ducted_extension","whf":false,"op_total":2370.36,"op_savings":-366.35,"installed":25700,"incremental":13300,"co2e":9320.5,"occ_unmet":0.25,"bsmt_swing":12.27,"mf_rh_out":3678,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"D","id":"D2_ducted_ext_B1","label":"Basement ducted extension (PTHP proxy) + B1 dual-fuel cc-ASHP (inverter, gas backup + gas DHW)","env_attic":19,"env_air":null,"sys":"dual_fuel_ccASHP","comp":"inverter","dhw":"gas_tank","bsmt":"ducted_extension","whf":false,"op_total":2351.86,"op_savings":-347.85,"installed":24900,"incremental":12500,"co2e":9305.4,"occ_unmet":0.5,"bsmt_swing":12.33,"mf_rh_out":3677,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"D","id":"D3_panel_A2W","label":"Basement panel radiators off A2W loop + water-based heat-pump options main (panel) + separate ducted DX + 240V HPWH","env_attic":19,"env_air":null,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"panel_radiators","whf":false,"op_total":2188.99,"op_savings":-184.98,"installed":38700,"incremental":26300,"co2e":8454.3,"occ_unmet":2.0,"bsmt_swing":12.09,"mf_rh_out":3689,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":"panel_radiators"}}},{"stage":"D","id":"D4_fintube_A2W","label":"Basement fin-tube baseboard off A2W loop + water-based heat-pump options main (panel) + separate ducted DX + 240V HPWH","env_attic":19,"env_air":null,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"fintube_baseboard","whf":false,"op_total":2171.31,"op_savings":-167.3,"installed":37400,"incremental":25000,"co2e":8393.9,"occ_unmet":0.0,"bsmt_swing":12.16,"mf_rh_out":3689,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":"panel_radiators"}}},{"stage":"D","id":"D5_toekick_A2W","label":"Basement toe-kick fan coils off A2W loop + water-based heat-pump options main (panel) + separate ducted DX + 240V HPWH","env_attic":19,"env_air":null,"sys":"air_to_water","comp":"inverter","dhw":"hpwh_240v","bsmt":"toekick_fancoil","whf":false,"op_total":2182.68,"op_savings":-178.67,"installed":38000,"incremental":25600,"co2e":8439.7,"occ_unmet":1.25,"bsmt_swing":12.16,"mf_rh_out":3689,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":"panel_radiators"}}},{"stage":"D","id":"D6_elecmat_B3","label":"Basement dry electric radiant mat (resistance, COP 1) + B3 all-electric cc-ASHP (inverter) + 240V HPWH","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"electric_radiant_mat","whf":false,"op_total":2449.18,"op_savings":-445.17,"installed":36400,"incremental":24000,"co2e":9594.4,"occ_unmet":0.25,"bsmt_swing":12.27,"mf_rh_out":3678,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"D","id":"D7_elecmat_B1","label":"Basement dry electric radiant mat (resistance, COP 1) + B1 dual-fuel cc-ASHP (inverter, gas backup + DHW)","env_attic":19,"env_air":null,"sys":"dual_fuel_ccASHP","comp":"inverter","dhw":"gas_tank","bsmt":"electric_radiant_mat","whf":false,"op_total":2415.06,"op_savings":-411.05,"installed":35600,"incremental":23200,"co2e":9527.7,"occ_unmet":0.0,"bsmt_swing":12.33,"mf_rh_out":3677,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"D","id":"D8_minisplit_B3","label":"Basement dedicated cc mini-split head + B3 all-electric cc-ASHP (inverter) + 240V HPWH","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"mini_split","whf":false,"op_total":2358.88,"op_savings":-354.87,"installed":28000,"incremental":15600,"co2e":9279.7,"occ_unmet":0.25,"bsmt_swing":12.27,"mf_rh_out":3678,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"D","id":"D9_minisplit_B1","label":"Basement dedicated cc mini-split head + B1 dual-fuel cc-ASHP (inverter, gas backup + DHW)","env_attic":19,"env_air":null,"sys":"dual_fuel_ccASHP","comp":"inverter","dhw":"gas_tank","bsmt":"mini_split","whf":false,"op_total":2341.9,"op_savings":-337.89,"installed":27200,"incremental":14800,"co2e":9269.7,"occ_unmet":0.5,"bsmt_swing":12.33,"mf_rh_out":3677,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"D","id":"D10_minisplit_B3_att49air15","label":"Basement mini-split + B3 all-electric cc-ASHP @ attic R49 + 1.5 ACH50 (envelope package)","env_attic":49,"env_air":1.5,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"mini_split","whf":false,"op_total":2091.34,"op_savings":-87.33,"installed":33500,"incremental":21100,"co2e":7957.6,"occ_unmet":0.5,"bsmt_swing":12.17,"mf_rh_out":691,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":49,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":1.5,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"E","id":"E1_whf_B3","label":"Whole-house fan overlay on B3 all-electric cc-ASHP (inverter) + 240V HPWH (as-is envelope)","env_attic":19,"env_air":null,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":true,"op_total":2139.9,"op_savings":-135.89,"installed":24300,"incremental":11900,"co2e":8510.7,"occ_unmet":0.0,"bsmt_swing":11.59,"mf_rh_out":3731,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":19,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":null,"lbl_n":18},"equipment":{"radiant_delivery":null}}},{"stage":"E","id":"E2_whf_B3e","label":"Whole-house fan overlay on B3 all-electric cc-ASHP (inverter) + 240V HPWH @ attic R49 + 1.5 ACH50","env_attic":49,"env_air":1.5,"sys":"all_electric_ccASHP","comp":"inverter","dhw":"hpwh_240v","bsmt":"calibrated_single_diffuser_float","whf":true,"op_total":1870.38,"op_savings":133.63,"installed":29800,"incremental":17400,"co2e":7174.9,"occ_unmet":0.0,"bsmt_swing":11.51,"mf_rh_out":811,"rh_basis":"occupied","scopes":{"envelope":{"attic_r_ip":49,"wall_cavity_r_ip":11,"wall_ci_r_ip":0,"air_seal_ach50":1.5,"lbl_n":18},"equipment":{"radiant_delivery":null}}}]};
+
+/* ============================================================= */
+const R = DB.records, META = DB.meta;
+const B0 = R.find(x=>x.id==='B0_gas_baseline');
+const LS = 'retrofit_scenario_review_public';
+
+/* Public view: gross preliminary incremental cost only; incentives are intentionally excluded. */
+function xVal(r){ return r.incremental; }
+document.getElementById('meta').textContent = '31 precomputed residential retrofit scenarios. This public review shows comparative outcomes, not a reusable model or design specification.';
+document.getElementById('carbonBanner').innerHTML = '⚠ <b>Carbon basis: annual-average.</b> Results use a regional electricity-emissions factor plus on-site gas combustion. Hourly-marginal electricity emissions have not been applied. Costs are preliminary ROM estimates, not quotes.';
+
+/* ---------- persisted state ---------- */
+const state = Object.assign({
+  gate:true, maxUnmet:0.5, stage:'', colorBy:'group', yMetric:'co2e', sel:'B0_gas_baseline',
+  w:{c:40,u:30,ca:20,o:10}
+}, load());
+function load(){ return {}; }
+function save(){}
+
+/* ---------- format helpers ---------- */
+const fmt=(v,d=0)=>v==null?'—':Number(v).toLocaleString(undefined,{maximumFractionDigits:d,minimumFractionDigits:d});
+const usd=v=>v==null?'—':'$'+Number(v).toLocaleString(undefined,{maximumFractionDigits:0});
+/* Plain-language names for the surface (dropdowns, legend, chips); technical names for the click-through detail. */
+const SYS_PLAIN={gas_furnace_DX_baseline:'Gas furnace + AC (current)',dual_fuel_ccASHP:'Hybrid: heat pump + gas backup',all_electric_ccASHP:'Electric heat pump',gshp:'Geothermal heat pump',air_to_water:'Water-based heat pump'};
+const SYS_TECH={gas_furnace_DX_baseline:'Gas furnace + DX split AC (baseline)',dual_fuel_ccASHP:'Dual-fuel cold-climate ASHP + gas-furnace backup',all_electric_ccASHP:'All-electric cold-climate ASHP + electric-resistance backup',gshp:'Ground-source (geothermal) heat pump, variable-speed',air_to_water:'Air-to-water heat pump (A2W)'};
+const SYS_LABEL=SYS_PLAIN; // back-compat alias
+const COMP_PLAIN={inverter:'Variable-speed',single_stage:'Single-speed'};
+const COMP_TECH={inverter:'inverter compressor',single_stage:'single-stage compressor'};
+const DHW_PLAIN={gas_tank:'Gas tank',hpwh_240v:'Heat-pump (240V)',hpwh_120v:'Heat-pump (120V)'};
+const DHW_TECH={gas_tank:'gas storage tank',hpwh_240v:'heat-pump water heater, 240V',hpwh_120v:'heat-pump water heater, 120V (shared circuit)'};
+const BSMT_PLAIN={calibrated_single_diffuser_float:'Served by main system',ducted_extension:'Basement registers (existing trunk)',panel_radiators:'Panel radiators',fintube_baseboard:'Baseboard heaters',toekick_fancoil:'Toe-kick fan coils',electric_radiant_mat:'Electric radiant floor',mini_split:'Mini-split (ductless)'};
+const BSMT_TECH={calibrated_single_diffuser_float:'calibrated single-diffuser float (main system)',ducted_extension:'registers + return off the existing basement supply trunk (the trunk already runs through the basement; modeled as a ducted extension, PTHP-class proxy) — true independent control needs a zone damper + thermostat',panel_radiators:'A2W panel radiators',fintube_baseboard:'A2W fin-tube baseboard',toekick_fancoil:'A2W toe-kick fan coils',electric_radiant_mat:'dry electric radiant mat (resistance, COP 1)',mini_split:'dedicated cold-climate mini-split head'};
+const A2W_PLAIN={hydroair:'Ducted air',panel_radiators:'Panel radiators + ducted AC',fintube_baseboard:'Baseboard + ducted AC'};
+const A2W_TECH={hydroair:'hydro-air (ducted air handler)',panel_radiators:'panel radiators + separate ducted DX cooling',fintube_baseboard:'fin-tube baseboard + separate ducted DX cooling'};
+function recA2w(r){ return (r.scopes.equipment && r.scopes.equipment.radiant_delivery) || 'hydroair'; }
+const sysColor={gas_furnace_DX_baseline:'#8a929b',dual_fuel_ccASHP:'#d98426',all_electric_ccASHP:'#2b6cb0',gshp:'#2f9e6f',air_to_water:'#8e5bd0'};
+const stageColor={A:'#6a8ea3',B:'#2b6cb0',C:'#8e5bd0',D:'#d98426',E:'#2f9e6f'};
+const grpColor={dr:'#2f9e6f',bw:'#2b6cb0',to:'#d98426'};
+const STAGES=[
+  {k:'A',name:'A · Envelope',d:'attic / wall / air-sealing, on gas'},
+  {k:'B',name:'B · Equipment',d:'heat-pump paths + NEC service check'},
+  {k:'C',name:'C · water-based heat-pump options',d:'panel / fin-tube + ducted DX'},
+  {k:'D',name:'D · Basement zone',d:'6 basement distribution terminals'},
+  {k:'E',name:'E · Whole-house fan',d:'free-cooling overlay'}
+];
+
+/* ---------- derived per-record ---------- */
+function dCarbon(r){return r.co2e-B0.co2e;}
+function dOp(r){return r.op_total-B0.op_total;}       // + = costs more than baseline
+function group(r){
+  if(r.id===B0.id) return 'base';
+  const beatsCarbon=dCarbon(r)<0, beatsOp=r.op_savings>0;
+  if(beatsCarbon && beatsOp && xVal(r)<=8000) return 'dr';   // cheap + pays back + cleaner
+  if(beatsCarbon) return 'bw';                                     // cleaner but needs budget
+  return 'to';                                                    // raises carbon on this grid
+}
+const GRP_META={
+  base:{c:'#1b2026',t:'Gas baseline (reference)'},
+  dr:{c:grpColor.dr,t:'Do-regardless — cheap, pays back, cuts carbon'},
+  bw:{c:grpColor.bw,t:'Budget-dependent win — cuts carbon, higher upfront'},
+  to:{c:grpColor.to,t:'Raises carbon on the current annual-average grid'}
+};
+
+/* ---------- comfort gate ---------- */
+function gatePass(r){ return (r.occ_unmet||0) <= state.maxUnmet; }
+function comfortPill(r){
+  const u=r.occ_unmet||0;
+  if(u<=state.maxUnmet) return '<span class="pill ok">comfortable</span>';
+  return '<span class="pill '+(u>=1.5?'bad':'warn')+'">'+u+' h unmet</span>';
+}
+
+/* ---------- ranks within passing pool (for detail card context) ---------- */
+function ranks(){
+  const pool=R.filter(gatePass);
+  const by=(key,asc)=>{const s=[...pool].sort((a,b)=>asc?(a[key]-b[key]):(b[key]-a[key]));const m={};s.forEach((r,i)=>m[r.id]=i+1);return m;};
+  const byv=(valFn,asc)=>{const s=[...pool].sort((a,b)=>asc?(valFn(a)-valFn(b)):(valFn(b)-valFn(a)));const m={};s.forEach((r,i)=>m[r.id]=i+1);return m;};
+  return {n:pool.length, upfront:byv(xVal,true), carbon:by('co2e',true), op:by('op_total',true)};
+}
+
+/* ---------- colour dispatch ---------- */
+function colorOf(r){
+  if(state.colorBy==='sys') return sysColor[r.sys]||'#555';
+  if(state.colorBy==='stage') return stageColor[r.stage]||'#555';
+  return GRP_META[group(r)].c;
+}
+
+/* ============================================================= */
+/* STAGE RAIL */
+function renderRail(){
+  const rail=document.getElementById('rail');
+  const counts={};R.forEach(r=>counts[r.stage]=(counts[r.stage]||0)+1);
+  let html='<div class="stg'+(state.stage===''?' active':'')+'" data-s=""><span class="c">'+R.length+'</span><div class="n">All stages</div><div class="d">the full field of runs</div></div>';
+  html+=STAGES.map(s=>'<div class="stg'+(state.stage===s.k?' active':'')+'" data-s="'+s.k+'"><span class="c">'+(counts[s.k]||0)+'</span><div class="n">'+s.name+'</div><div class="d">'+s.d+'</div></div>').join('');
+  rail.innerHTML=html;
+  rail.querySelectorAll('.stg').forEach(el=>el.onclick=()=>{ state.stage=el.dataset.s; save(); renderRail(); drawField(); renderTable(); });
+}
+
+/* ============================================================= */
+/* FIELD SCATTER */
+let field;
+const yMeta={co2e:{lab:'Annual CO₂e (kg/yr)',get:r=>r.co2e},op_total:{lab:'Operating cost ($/yr)',get:r=>r.op_total}};
+function paretoFront(pts){ // minimise x and y; pts sorted by x asc
+  const s=[...pts].sort((a,b)=>a.x-b.x); const out=[]; let best=Infinity;
+  s.forEach(p=>{ if(p.y<best-1e-9){out.push(p);best=p.y;} });
+  return out;
+}
+function drawField(){
+  const ym=yMeta[state.yMetric];
+  const shown=R.filter(r=> (state.stage===''||r.stage===state.stage) && r.incremental!=null && ym.get(r)!=null);
+  const pass=shown.filter(gatePass), fail=shown.filter(r=>!gatePass(r));
+  const mkPts=arr=>arr.map(r=>({x:xVal(r),y:ym.get(r),id:r.id,r}));
+  const passPts=mkPts(pass);
+  const front=paretoFront(passPts);
+
+  const datasets=[];
+  // efficient frontier line (behind points)
+  datasets.push({type:'line',label:'efficient frontier',data:front.map(p=>({x:p.x,y:p.y})),borderColor:'#9aa3ad',borderDash:[5,4],borderWidth:1.5,pointRadius:0,fill:false,order:5,tension:0});
+  // passing points, coloured
+  datasets.push({label:'runs',data:passPts,parsing:false,order:1,
+    pointRadius:passPts.map(p=>p.id===state.sel?9:(p.id===B0.id?7:6)),
+    pointHoverRadius:10,
+    pointStyle:passPts.map(p=>p.id===B0.id?'rectRot':'circle'),
+    backgroundColor:passPts.map(p=>colorOf(p.r)),
+    borderColor:passPts.map(p=>p.id===state.sel?'#111':'rgba(255,255,255,.8)'),
+    borderWidth:passPts.map(p=>p.id===state.sel?2.5:1)});
+  // gate failures (hollow grey)
+  if(fail.length) datasets.push({label:'fails gate',data:mkPts(fail),parsing:false,order:2,pointRadius:5,pointStyle:'crossRot',backgroundColor:'rgba(176,37,37,.0)',borderColor:'#c98',borderWidth:1.5});
+
+  if(field) field.destroy();
+  field=new Chart(document.getElementById('field'),{
+    type:'scatter',
+    data:{datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      onClick:(e,els)=>{ if(els.length){const el=els.find(x=>x.datasetIndex===1||x.datasetIndex===2)||els[0]; const ds=field.data.datasets[el.datasetIndex]; const pt=ds.data[el.index]; if(pt&&pt.id) selectRun(pt.id);} },
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{
+          title:c=>c[0].raw.r?c[0].raw.r.id:'',
+          label:c=>{const r=c.raw.r;if(!r)return'';const inc=xVal(r);return [plainName(r), (inc>=0?'+':'−')+usd(Math.abs(inc))+(state.netMode?' net of incentives':' incremental')+' · '+fmt(ym.get(r))+(state.yMetric==='co2e'?' kg CO₂e':' $/yr'), (dCarbon(r)<0?'▼':'▲')+' '+fmt(Math.abs(dCarbon(r)))+' kg vs baseline'+(state.netMode&&incentiveFor(r)>0?' · incentive '+usd(incentiveFor(r)):'')];}
+        }}
+      },
+      scales:{
+        x:{title:{display:true,text:state.netMode?'Incremental upfront $ vs gas baseline — NET of incentives (ROM)':'Incremental upfront $ vs gas baseline (ROM, gross)'},grid:{color:'#eef1f4'}},
+        y:{title:{display:true,text:ym.lab},grid:{color:'#eef1f4'}}
+      }
+    }
+  });
+  // baseline reference line on Y
+  drawLegend();
+  const passCount=pass.length, frontIds=front.map(p=>p.id);
+  document.getElementById('fieldNote').innerHTML='Dashed line = efficient frontier (best carbon for each upfront level): <b>'+frontIds.join(', ')+'</b>. ◆ = gas baseline. ✕ = fails the comfort gate. Lower-left is better.'+'';
+}
+function drawLegend(){
+  const L=document.getElementById('fieldLegend'); let html='';
+  if(state.colorBy==='group'){
+    html=Object.keys(GRP_META).map(k=>'<span><span class="dot" style="background:'+GRP_META[k].c+'"></span>'+GRP_META[k].t+'</span>').join('');
+  }else if(state.colorBy==='sys'){
+    html=Object.keys(SYS_LABEL).map(k=>'<span><span class="dot" style="background:'+sysColor[k]+'"></span>'+SYS_LABEL[k]+'</span>').join('');
+  }else{
+    html=STAGES.map(s=>'<span><span class="dot" style="background:'+stageColor[s.k]+'"></span>'+s.name+'</span>').join('');
+  }
+  html+='<span><span class="line"></span>efficient frontier</span>';
+  L.innerHTML=html;
+}
+
+/* ============================================================= */
+/* DETAIL CARD */
+function bar(label,val,max,color,valTxt,baseVal){
+  const pct=Math.max(0,Math.min(100,val/max*100));
+  const bp=baseVal!=null?Math.max(0,Math.min(100,baseVal/max*100)):null;
+  return '<div class="mb"><div class="t"><span>'+label+'</span><span>'+valTxt+'</span></div>'+
+    '<div class="track"><div class="fill" style="width:'+pct+'%;background:'+color+'"></div>'+
+    (bp!=null?'<div class="base" style="left:'+bp+'%" title="baseline"></div>':'')+'</div></div>';
+}
+function deltaSpan(delta,goodIfNeg,unit){
+  if(Math.abs(delta)<1e-6) return '<span class="flat">no change</span>';
+  const good = goodIfNeg? delta<0 : delta>0;
+  const arrow = delta<0?'▼':'▲';
+  return '<span class="'+(good?'down':'up')+'">'+arrow+' '+fmt(Math.abs(delta))+unit+'</span>';
+}
+function envPlain(e){
+  const parts=['Attic R'+e.attic_r_ip];
+  if(e.wall_cavity_r_ip>11) parts.push('walls R'+e.wall_cavity_r_ip+(e.wall_ci_r_ip?'+R'+e.wall_ci_r_ip+' foam':''));
+  else if(e.wall_ci_r_ip) parts.push('R'+e.wall_ci_r_ip+' wall foam');
+  if(e.air_seal_ach50) parts.push((e.air_seal_ach50<=1.5?'tight':'moderate')+' air sealing');
+  if(parts.length===1 && e.attic_r_ip===19) return 'Current envelope';
+  return parts.join(', ');
+}
+function scopeChips(r){
+  const e=r.scopes.envelope;
+  const chips=[
+    ['Insulation & sealing',envPlain(e)],
+    ['System',SYS_PLAIN[r.sys]||r.sys],
+    ['Heat pump speed',COMP_PLAIN[r.comp]||r.comp],
+    ['Water heater',DHW_PLAIN[r.dhw]||r.dhw],
+    ['Basement heat',BSMT_PLAIN[r.bsmt]||r.bsmt],
+  ];
+  if(r.sys==='air_to_water') chips.push(['Heat delivery',A2W_PLAIN[recA2w(r)]||recA2w(r)]);
+  if(r.whf) chips.push(['Whole-house fan','Yes']);
+  return chips.map(c=>'<span class="chip">'+c[0]+' <b>'+c[1]+'</b></span>').join('');
+}
+function techLine(r){
+  const e=r.scopes.envelope;
+  const bits=[SYS_TECH[r.sys]||r.sys, COMP_TECH[r.comp]||r.comp, 'DHW: '+(DHW_TECH[r.dhw]||r.dhw)];
+  if(r.sys==='air_to_water') bits.push('delivery: '+(A2W_TECH[recA2w(r)]||recA2w(r)));
+  bits.push('basement: '+(BSMT_TECH[r.bsmt]||r.bsmt));
+  const env='attic R'+e.attic_r_ip+', wall cavity R'+e.wall_cavity_r_ip+(e.wall_ci_r_ip?' + R'+e.wall_ci_r_ip+' CI':'')+', air-seal '+(e.air_seal_ach50?e.air_seal_ach50+' ACH50':'as-is');
+  return env+' · '+bits.join(' · ');
+}
+function renderDetail(){
+  const r=R.find(x=>x.id===state.sel)||B0;
+  const rk=ranks();
+  const cg=gatePass(r);
+  const co2delta=dCarbon(r), opSave=r.op_savings;
+
+  document.getElementById('detail').innerHTML =
+    '<h3>'+r.label+'</h3>'+
+    '<div class="small muted">Stage '+'Scenario '+(R.indexOf(r)+1)+' · '+(cg?'passes':'fails')+' current comfort gate</div>'+
+    '<div class="chips">'+scopeChips(r)+'</div>'+
+
+    '<div class="prio">'+
+      /* Comfort */
+      '<div class="pcell"><div class="lab"><span>1 · Comfort</span></div>'+
+        '<div class="big">'+comfortPill(r)+'</div>'+
+        '<div class="sub2">Occupied unmet '+fmt(r.occ_unmet,2)+' h · basement swing '+fmt(r.bsmt_swing,1)+' °F <span class="muted">(all-hours; occupied ≈ 7.5 °F)</span></div>'+
+        '<div class="sub2">RH out-of-band '+fmt(r.mf_rh_out)+' h <span class="muted">('+(r.rh_basis.indexOf('occupied')===0?'occupied':'all-hours')+')</span></div>'+
+      '</div>'+
+      /* Upfront */
+      '<div class="pcell"><div class="lab"><span>2 · Upfront '+(state.netMode?'(net)':'(ROM)')+'</span>'+(cg?'<span class="rank">#'+rk.upfront[r.id]+' / '+rk.n+'</span>':'')+'</div>'+
+        '<div class="big">'+usd(state.netMode?netInstalled(r):r.installed)+'</div>'+
+        '<div class="sub2">'+(r.id===B0.id?'baseline cost':((xVal(r)>=0?'+':'−')+usd(Math.abs(xVal(r)))+' vs baseline'))+(state.netMode&&incentiveFor(r)>0?' <span class="muted">(gross '+usd(r.installed)+' − '+usd(incentiveFor(r))+' incentive)</span>':'')+'</div>'+
+      '</div>'+
+      /* Carbon */
+      '<div class="pcell"><div class="lab"><span>3 · Carbon</span>'+(cg?'<span class="rank">#'+rk.carbon[r.id]+' / '+rk.n+'</span>':'')+'</div>'+
+        '<div class="big">'+fmt(r.co2e)+' <span class="sub2">kg/yr</span></div>'+
+        '<div class="sub2">'+deltaSpan(co2delta,true,' kg vs baseline')+'</div>'+
+      '</div>'+
+      /* Operating */
+      '<div class="pcell"><div class="lab"><span>4 · Operating</span>'+(cg?'<span class="rank">#'+rk.op[r.id]+' / '+rk.n+'</span>':'')+'</div>'+
+        '<div class="big">'+usd(r.op_total)+'<span class="sub2">/yr</span></div>'+
+        '<div class="sub2">'+deltaSpan(-opSave,true,'/yr vs baseline')+'</div>'+
+      '</div>'+
+    '</div>';
+
+  renderRail(); // keep active states fresh
+}
+function selectRun(id){ state.sel=id; save(); highlightField(); renderDetail(); markTableSel(); }
+function highlightField(){ drawField(); }
+
+/* ============================================================= */
+/* TABLE */
+function plainName(r){
+  const e=r.scopes.envelope, tags=[];
+  let base=SYS_PLAIN[r.sys]||r.sys;
+  if(r.sys==='air_to_water') base+=' — '+(A2W_PLAIN[recA2w(r)]||'').replace(' + ducted AC','');
+  if(e.attic_r_ip!==19||e.wall_cavity_r_ip>11||e.wall_ci_r_ip||e.air_seal_ach50) tags.push('insulation upgrade');
+  if(r.bsmt!=='calibrated_single_diffuser_float') tags.push('basement: '+(BSMT_PLAIN[r.bsmt]||'').toLowerCase());
+  if(r.whf) tags.push('ventilation option');
+  return base+(tags.length?' + '+tags.join(' + '):'');
+}
+const COLS=[
+ {k:'label',t:'Scenario',l:true,f:r=>plainName(r)+'<br><span class="tiny">'+'Scenario '+(R.indexOf(r)+1)+'</span>'},
+ {k:'incremental',t:'Upfront +$',f:r=>r.id===B0.id?'base':((xVal(r)>=0?'+':'−')+usd(Math.abs(xVal(r))))},
+ {k:'co2e',t:'CO₂e Δ',f:r=>colorNum(dCarbon(r),true)},
+ {k:'op_total',t:'Operating Δ',f:r=>colorNum(-r.op_savings,true)},
+ {k:'nec_a',t:'NEC A',f:r=>r.nec_a==null?'—':fmt(r.nec_a,0)+' ('+fmt(r.nec_pct,0)+'%)'},
+ {k:'occ_unmet',t:'Comfort',f:r=>comfortPill(r)},
+];
+function colorNum(delta,goodIfNeg){
+  if(Math.abs(delta)<1e-6) return '<span class="flat">0</span>';
+  const good=goodIfNeg?delta<0:delta>0;
+  return '<span class="'+(good?'down':'up')+'">'+(delta<0?'−':'+')+fmt(Math.abs(delta))+'</span>';
+}
+let sortK='co2e', sortAsc=true;
+function renderTable(){
+  const th=document.querySelector('#tbl thead');
+  th.innerHTML='<tr>'+COLS.map(c=>'<th class="'+(c.l?'l':'')+'" data-k="'+c.k+'">'+c.t+(sortK===c.k?(sortAsc?' ▲':' ▼'):'')+'</th>').join('')+'</tr>';
+  th.querySelectorAll('th').forEach(h=>h.onclick=()=>{const k=h.dataset.k;sortAsc=(sortK===k)?!sortAsc:true;sortK=k;renderTable();});
+  let rows=R.filter(r=>state.stage===''||r.stage===state.stage);
+  rows.sort((a,b)=>{let x=(sortK==='incremental')?xVal(a):a[sortK],y=(sortK==='incremental')?xVal(b):b[sortK];if(x==null)x=Infinity;if(y==null)y=Infinity;if(typeof x==='string')return sortAsc?x.localeCompare(y):y.localeCompare(x);return sortAsc?x-y:y-x;});
+  const tb=document.querySelector('#tbl tbody');tb.innerHTML='';
+  rows.forEach(r=>{
+    const tr=document.createElement('tr');tr.dataset.id=r.id;
+    if(!gatePass(r))tr.classList.add('dim');
+    if(r.id===state.sel)tr.classList.add('sel');
+    tr.innerHTML=COLS.map(col=>'<td class="'+(col.l?'l':'')+'">'+col.f(r)+'</td>').join('');
+    tr.onclick=()=>selectRun(r.id);
+    tb.appendChild(tr);
+  });
+}
+function markTableSel(){ document.querySelectorAll('#tbl tbody tr').forEach(tr=>tr.classList.toggle('sel',tr.dataset.id===state.sel)); }
+
+/* ============================================================= */
+/* WEIGHTED SCORE (subordinate) */
+function norm(v,arr,invert){const mn=Math.min(...arr),mx=Math.max(...arr);if(mx===mn)return 1;const t=(v-mn)/(mx-mn);return invert?1-t:t;}
+function drawScore(){
+  const w=state.w;
+  wComfortV.textContent=w.c;wUpfrontV.textContent=w.u;wCarbonV.textContent=w.ca;wOperV.textContent=w.o;
+  const tot=(w.c+w.u+w.ca+w.o)||1;
+  const pool=R.filter(gatePass);
+  const inc=pool.map(r=>xVal(r)||0),co=pool.map(r=>r.co2e||0),op=pool.map(r=>r.op_total||0),un=pool.map(r=>r.occ_unmet||0);
+  const scored=pool.map(r=>{
+    const s=100*(w.c*norm(r.occ_unmet||0,un,true)+w.u*norm(xVal(r)||0,inc,true)+w.ca*norm(r.co2e||0,co,true)+w.o*norm(r.op_total||0,op,true))/tot;
+    return {r,s};
+  }).sort((a,b)=>b.s-a.s);
+  const max=scored.length?scored[0].s:1;
+  document.getElementById('scoreList').innerHTML=scored.slice(0,12).map(o=>
+    '<div class="row" data-id="'+o.r.id+'"><div style="width:44px;text-align:right;font-weight:700">'+o.s.toFixed(0)+'</div><div class="bar" style="width:'+(o.s/max*100*2.6)+'px;background:'+GRP_META[group(o.r)].c+'"></div><div class="small">'+'Scenario '+(R.indexOf(o.r)+1)+' <span class="muted">'+plainName(o.r)+'</span></div></div>'
+  ).join('');
+  document.querySelectorAll('#scoreList .row').forEach(el=>el.onclick=()=>selectRun(el.dataset.id));
+}
+
+/* ============================================================= */
+/* WIRE-UP + INIT */
+function setGateUI(){document.getElementById('gateTgl').classList.toggle('on',state.gate);document.getElementById('maxUnmet').value=state.maxUnmet;}
+document.getElementById('gateTgl').onclick=()=>{state.gate=!state.gate;save();setGateUI();refreshAll();};
+document.getElementById('showAll').onclick=()=>{state.gate=false;save();setGateUI();refreshAll();};
+document.getElementById('maxUnmet').addEventListener('input',e=>{state.maxUnmet=+e.target.value;state.gate=true;save();setGateUI();refreshAll();});
+document.getElementById('colorBy').addEventListener('change',e=>{state.colorBy=e.target.value;save();drawField();});
+document.getElementById('yMetric').addEventListener('change',e=>{state.yMetric=e.target.value;save();drawField();});
+[['wComfort','c'],['wUpfront','u'],['wCarbon','ca'],['wOper','o']].forEach(([id,key])=>{
+  const el=document.getElementById(id);el.value=state.w[key];
+  el.addEventListener('input',()=>{state.w[key]=+el.value;save();drawScore();});
+});
+
+function refreshAll(){
+  drawField();renderDetail();renderTable();drawScore();updateCount();
+}
+// override gatePass to honour on/off
+const _gatePass=gatePass;
+gatePass=function(r){ return state.gate ? ((r.occ_unmet||0)<=state.maxUnmet) : true; };
+function updateCount(){
+  const pass=R.filter(r=>(r.occ_unmet||0)<=state.maxUnmet).length;
+  document.getElementById('gateCount').innerHTML='<b>'+pass+' of '+R.length+'</b> runs pass the comfort gate (≤ '+state.maxUnmet+' h occupied unmet). Gate is currently <b>'+(state.gate?'ON':'OFF — showing all 31')+'</b>.';
+}
+document.getElementById('foot').innerHTML='Method boundary: precomputed EnergyPlus scenario outputs, shown as a public decision-review artifact. Carbon uses an annual-average grid factor; preliminary costs are gross ROM estimates, not quotes. This page intentionally excludes raw model files, utility records, physical-house inputs, custom-bundle export, and AI/agent handoff.';
+
+document.getElementById('yMetric').value=state.yMetric;
+document.getElementById('colorBy').value=state.colorBy;
+setGateUI();
+renderRail();
+refreshAll();
+</script>
+</body>
+</html>
