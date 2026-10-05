@@ -5,9 +5,14 @@ test('tools page loads', async ({ page }) => {
   await expect(page).toHaveTitle(/Tools.*Mat Coalson/);
 });
 
-test('tools page has three repo cards', async ({ page }) => {
+test('tools page has four repo cards', async ({ page }) => {
   await page.goto('/tools');
-  await expect(page.locator('.repo-card')).toHaveCount(3);
+  await expect(page.locator('.repo-card')).toHaveCount(4);
+});
+
+test('tools page links to the residential retrofit scenario review', async ({ page }) => {
+  await page.goto('/tools');
+  await expect(page.locator('a[href="/projects/retrofit-scenario-review/"]')).toBeVisible();
 });
 
 test('tools page has OpenStudio section', async ({ page }) => {
