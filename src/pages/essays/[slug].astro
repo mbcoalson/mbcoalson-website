@@ -12,8 +12,9 @@ export async function getStaticPaths() {
 
 const { essay } = Astro.props;
 const { Content } = await render(essay);
+const canonical = new URL(Astro.url.pathname, 'https://mbcoalson.com').href;
 ---
-<BaseLayout title={essay.data.title} description={essay.data.description}>
+<BaseLayout title={essay.data.title} description={essay.data.description} canonical={canonical}>
   <article class="section">
     <div class="container essay-container">
       <header>
