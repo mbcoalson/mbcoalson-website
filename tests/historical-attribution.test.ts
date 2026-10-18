@@ -21,8 +21,11 @@ for (const { route, title, authors } of historicalCredits) {
   });
 }
 
-test('unresolved Jazz provenance does not receive a guessed model credit', async ({ page }) => {
+test('Jazz credits user-confirmed Opus without inventing a version', async ({ page }) => {
   await page.goto('/essays/the-age-of-jazz/');
   await expect(page.locator('article h1')).toHaveText('The Age of Jazz');
-  await expect(page.locator('article header .byline')).toHaveCount(0);
+  await expect(page.locator('article header .byline')).toHaveText('Mat Coalson & Claude Opus (Anthropic)');
+  await page.goto('/writing/');
+  const link = page.getByRole('link', { name: 'The Age of Jazz', exact: true });
+  await expect(link.locator('xpath=ancestor::article').locator('.byline')).toHaveText('Mat Coalson & Claude Opus (Anthropic)');
 });

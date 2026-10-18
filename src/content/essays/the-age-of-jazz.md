@@ -2,6 +2,7 @@
 title: "The Age of Jazz"
 date: 2026-05-10
 description: "LLMs and the future of collaboration"
+authors: "Mat Coalson & Claude Opus (Anthropic)"
 draft: false
 ---
 
