@@ -2,7 +2,7 @@
 title: "Build It Better"
 date: 2026-09-21
 description: "AI infrastructure should be built cleanly, transparently, and with engineering discipline—not treated as a blank check for irresponsible growth."
-authors: "Mat Coalson"
+authors: "Mat Coalson, GPT-5.6 Sol & GPT-5.6 Terra (OpenAI)"
 draft: false
 ---
 

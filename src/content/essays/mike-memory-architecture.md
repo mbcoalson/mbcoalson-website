@@ -2,6 +2,7 @@
 title: "The Dream is Sci-Fi. The Tech is Catching Up."
 date: 2026-04-26
 description: "Building Mike — a local AI agent with tiered memory architecture. On why personality without memory is theater, and what it takes to build something that actually compounds."
+authors: "Mat Coalson & Claude Sonnet 4.6 (Anthropic)"
 draft: false
 ---
 
