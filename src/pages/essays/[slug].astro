@@ -22,6 +22,7 @@ const canonical = new URL(Astro.url.pathname, 'https://mbcoalson.com').href;
           {essay.data.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long' })}
         </time>
         <h1>{essay.data.title}</h1>
+        {essay.data.authors && <p class="byline">{essay.data.authors}</p>}
       </header>
       <div class="essay-body">
         <Content />
@@ -44,6 +45,12 @@ const canonical = new URL(Astro.url.pathname, 'https://mbcoalson.com').href;
     color: var(--color-muted);
     display: block;
     margin-bottom: 0.5rem;
+  }
+  .byline {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    font-style: italic;
+    margin-top: 0.5rem;
   }
   .essay-body {
     font-size: 1.05rem;

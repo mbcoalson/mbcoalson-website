@@ -26,6 +26,7 @@ const citizenScientistEntries = (await getCollection('citizen-scientist', ({ dat
                 </time>
                 <h2><a href={`/essays/${essay.id.replace(/\.md$/, '')}`}>{essay.data.title}</a></h2>
                 <p>{essay.data.description}</p>
+                {essay.data.authors && <p class="byline">{essay.data.authors}</p>}
               </article>
             </li>
           ))}
