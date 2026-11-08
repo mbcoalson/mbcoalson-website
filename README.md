@@ -1,43 +1,44 @@
-# Astro Starter Kit: Minimal
+# mbcoalson.com
 
-```sh
-npm create astro@latest -- --template minimal
+Source for [mbcoalson.com](https://mbcoalson.com): essays and small public tools about building energy, AI, and the practical question of how we keep useful systems answerable to people.
+
+The site is intentionally small. It is a place for work that benefits from being public—not a content mill, a personal data archive, or a claim that every project is finished.
+
+## What’s here
+
+- **Writing** — essays on AI, technology, freedom, and the human side of technical systems
+- **Citizen-scientist work** — documented explorations of building energy and AI-assisted technical practice
+- **Tools and projects** — bounded public artifacts with their own stated methods and limitations
+- **Water Rising** — a separate creative-fiction project
+
+## Local development
+
+Requires Node.js 22.12 or later.
+
+```bash
+npm ci
+npm run dev
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+Open the local URL Astro prints (normally `http://localhost:4321`).
 
-## 🚀 Project Structure
+### Verification
 
-Inside of your Astro project, you'll see the following folders and files:
-
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
+```bash
+npm run build
+npx playwright test
 ```
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+The Playwright suite checks core pages, content metadata, canonical URLs, privacy boundaries, and discovery links. A passing build or test suite is evidence about the site build—not a guarantee that claims in an essay or tool are correct.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Publishing
 
-Any static assets, like images, can be placed in the `public/` directory.
+The production branch is `master`. Pushing to it triggers the existing Netlify deployment, so public changes should arrive through a reviewed pull request and be checked locally before merge. After deployment, verify the intended public URL rather than treating a successful push as publication proof.
 
-## 🧞 Commands
+## Scope and privacy
 
-All commands are run from the root of the project, from a terminal:
+This repository contains public website source only. It should not receive private notes, client or employer material, family data, raw project files, credentials, or unpublished research evidence. Public tools and writing should state their limits rather than implying a broader authority.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
+## Contributing
 
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+This is primarily a personal site. Small corrections are welcome via an issue or pull request; please open an issue before proposing a substantial change.
